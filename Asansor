@@ -1,0 +1,50 @@
+ADCON1=7
+i var byte    :i=0
+j var byte    :j=0
+k var byte
+TrisB=0
+TrisA=%11001111
+PortA=%11111111
+PortB=%11111111
+x var byte[7]
+x[0]=%11111110
+x[1]=%11111101
+x[2]=%11111011
+x[3]=%11110111
+x[4]=%11101111
+x[5]=%11011111
+x[6]=%10111111
+label:
+    if PortA.0=0 then j=0
+    if PortA.1=0 then j=1
+    if PortA.2=0 then j=2
+    if PortA.3=0 then j=3
+    
+    if i<j then 
+        gosub cik
+    elseif i>j then
+        gosub in
+    else 
+        PortB=x[i*2]
+    endif  
+    
+   
+goto label
+
+cik:   
+    PortA.4=0
+    for k=i*2 to j*2
+        PortB=x[k]
+        pause 500
+    next k
+    i=j :PortA.4=1
+return
+
+in:
+    PortA.5=0
+    for k=i*2 to j*2   step -1
+        PortB=x[k]
+        pause 500
+    next k
+    i=j  :PortA.5=1
+return
