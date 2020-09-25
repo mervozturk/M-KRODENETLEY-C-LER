@@ -1,0 +1,93 @@
+ADCON1=7
+TrisA=%011000
+TrisB=%0000000
+PortB=0
+PortA=0
+    
+i var byte 
+istenentur var byte 
+y var byte
+z var byte
+zaman var byte
+
+x var byte [10]
+x[0]=%00111111
+x[1]=%00000110
+x[2]=%01011011
+x[3]=%01001111
+x[4]=%01100110
+x[5]=%01101101
+x[6]=%01111100
+x[7]=%00000111
+x[8]=%01111111
+x[9]=%01101111
+
+
+label:
+    goto nekadardonsun
+    pause 100
+    
+goto label
+ilerle :
+    while istenentur!=0  
+        gosub  ileri
+        istenentur=istenentur-1
+        Pause 100
+        gosub goster
+        PortB.7=1
+        if PortA.3==1 then goto label
+    wend
+goto label
+
+nekadardonsun:
+    PortB.4=1 : PortB.5=0 :  PortB.6=0 : PortB.7=0 
+    if PortA.3==1 then 
+        if istenentur==99 then istenentur=0
+        istenentur=istenentur+1
+    endif
+    PortB.4=0 : PortB.5=1 :  PortB.6=0 : PortB.7=0 
+    if PortA.3==1 then 
+         if istenentur==0 then istenentur=0
+         istenentur=istenentur-1
+    endif
+    PortB.4=0 : PortB.5=0 :  PortB.6=1 : PortB.7=0 
+    if PortA.3==1 then goto ilerle 
+
+    PortB.4=0 : PortB.5=0 :  PortB.6=0 : PortB.7=1 
+    if PortA.3==1 then istenentur=0
+    
+    
+    gosub goster
+    
+goto nekadardonsun  
+    
+goster:  
+    y=istenentur dig 0
+    z=istenentur dig 1
+    if istenentur<10 then
+        PortA.1=1
+        PortB=x[y]
+        pause 200
+    Else
+        for zaman=0 to 500
+            PortA.1=1
+            PortB=x[y]
+            pause 5
+            PortB=0 : PortA.0=1 
+            PortA.1=0
+            PortB=x[z]
+            pause 5
+            PortB=0 : PortA=0
+        next zaman
+     endif   
+     PortA=0
+return
+
+ileri:
+    for i=0 to 9
+        PortB=%00000001    :pause 100
+        PortB=%00000010    :pause 100 
+        PortB=%00000100    :pause 100
+        PortB=%00001000    :pause 100
+    next i
+return
