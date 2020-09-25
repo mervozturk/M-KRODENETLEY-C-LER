@@ -1,0 +1,51 @@
+DEFINE LCD_DREG PORTD 'LCD data portunun bağlandığı pic portu
+DEFINE LCD_DBIT 0 '4-bit bus için data bit(0yada4) başlangıç
+DEFINE LCD_RSREG PORTE 'LCD RS in bağlandığı pic portu
+DEFINE LCD_RSBIT 0 'RS in bağlandığı pic portE nin bit numarası
+DEFINE LCD_EREG PORTE 'LCD E nin bağlandığı pic portu
+DEFINE LCD_EBIT 2 'LCD E nin bağlandığı pic portE nin bit numarası
+DEFINE LCD_BITS 8 'PortD nin 8 biti veri transferi için kullanıldı
+TRISE=%000 'Aslında PortE.1 direkt toprağa çekilse olurdu ama
+PortE.1=0 ' PortE.1=0 olarak yaptık
+ADCON1=7 'porta ve porte yi dijitale ayarla
+PAUSE 100
+
+
+define HSER_RCSTA 90H
+define HSER_TXSTA 24H
+define HSER_BAUD 9600
+define HSER_CLROERR 1
+
+
+LCDOUT $fe,$40,$00,$15,$0e,$1f,$0e,$15,$00  'güneş şeklini 0. hafızaya at
+LCDOUT $fe,$48,$07,$0e,$1c,$1c,$1c,$0e,$07  'ay şeklini 1. hafızaya at
+LCDOUT $fe,$50,$04,$0e,$0e,$0e,$1f,$04,$00  'zil şeklini 2. hafızaya at
+LCDOUT $fe,$58,4,14,31,31,31,4,4  'ağaç şeklini 3. hafızaya at
+LCDOUT $fe,$60,0,10,0,17,14,0,0  'gülen surat şeklini 4. hafızaya at
+LCDOUT $fe,$68,0,10,0,14,17,0,0  'ağlayan surat şeklini 5. hafızaya at
+LCDOUT $fe,$70,0,14,16,14,1,30,4  ' ş harfini 6. hafızaya at
+LCDOUT $fe,$78,14,0,14,17,15,1,14  ' ğ harfini 7. hafızaya at
+
+'label:
+'birinci uygulama
+'lcdout $fe,1
+'lcdout "birinci satir"
+'lcdout $fe,$C0,"ikinci satir"
+'pause 500
+
+'goto label
+
+'label: 'ikinci uygulama
+'    lcdout$fe,1
+'    lcdout $fe,$80,0
+'    pause 500
+'goto label
+
+x var byte
+label: '3. uygulama
+
+    hserin [x]
+    hserout [x]
+    lcdout $fe,1,x
+    pause 100
+goto label
