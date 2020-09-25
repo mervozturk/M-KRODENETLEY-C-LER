@@ -1,0 +1,173 @@
+DEFINE LCD_DREG PORTD           'LCD data portunun baðlandýðý pic portu 
+
+DEFINE LCD_DBIT 0                        '4-bit bus için data bit(0yada4) baþlangýç
+
+DEFINE LCD_RSREG PORTE          'LCD RS in baðlandýðý pic portu 
+
+DEFINE LCD_RSBIT 0                      'RS in baðlandýðý pic portE nin bit numarasý
+
+DEFINE LCD_EREG PORTE            'LCD E nin baðlandýðý pic portu 
+
+DEFINE LCD_EBIT 2                        'LCD E nin baðlandýðý pic portE nin bit numarasý
+
+DEFINE LCD_BITS 8                             'PortD nin 8 biti veri transferi için kullanýldý
+
+TRISE=%000                                       'Aslýnda PortE.1 direkt topraða çekilse olurdu ama 
+
+PortE.1=0                                             ' PortE.1=0 olarak yaptýk
+
+ADCON1=7                                                'porta ve porte yi dijitale ayarla
+define HSER_RCSTA 90h
+DEFINE HSER_TXSTA 24h
+DEFINE HSER_BAUD 9600
+DEFINE HSER_CLROERR 1
+
+TrisB=%00000111
+PortB=0
+
+lcdout $fe,$40,4,14,21,4,4,4,4
+lcdout $fe,$48,4,4,4,4,21,14,4
+
+sayi var byte   :sayi=0
+tahmin  var byte   :tahmin=" "
+deger var byte :deger=" "
+gdeger var byte :gdeger=" "
+hamle var byte :hamle=0
+kontrol var byte :kontrol=" "
+basadon var byte
+
+label:
+    Hamle=0
+    sayi=0
+    deger=" "
+    gdeger=" "
+    kontrol=" "
+    tahmin=" "
+    PortB.1=0
+    lcdout $fe,1,"Sayi belirleme : GONDER e bas"
+    pause 100
+    if PortB.1==1 then 
+        while PortB.1==1
+        wend
+        hserout[1]
+        gosub sayitut
+    endif
+    hserin 100,devam,[deger]
+    devam: 
+    if deger=1 then goto tahminet
+goto label
+
+sayitut:
+    sayi=0
+    gdeger=" "
+    kontrol=0
+    while PortB.1==0
+        lcdout $fe,1,"2.oyuncunun belirledigi sayi: ",#sayi
+        if PortB.0=1 then gosub arttir
+        if PortB.2=1 then gosub azalt
+        pause 100
+    wend
+    TrisB=0
+    hserout[sayi]
+    lcdout $fe,1,"2.oyuncunun belirledigi sayi: ",#sayi
+    pause 100
+    while gdeger !=sayi
+        hamle=hamle+1
+        hserin[gdeger]
+        lcdout $fe,1,"2.oyuncunun belirledigi sayi: ",#sayi
+        lcdout $fe,$C0,"edilen tahmin: ",#gdeger
+        pause 100
+        if gdeger==sayi then goto son
+    wend
+    
+    
+return
+
+
+tahminet:
+    tahmin=0
+    kontrol=0
+    hserin 100,bekleme,[gdeger]
+    TrisB=%00000111
+    Lcdout $fe,1,"Tahmine Baslayabilirisin"
+    lcdout $fe,$C0,"Tahmin: ",#tahmin
+    pause 100
+    while kontrol!=1
+        while PortB.1==0
+            if PortB.0=1 then gosub arttir
+            if PortB.2=1 then gosub azalt
+            tahmin=sayi
+            lcdout $fe,$C0,"Tahmin: ",#tahmin
+            pause 100
+            
+            if PortB.1=1 then 
+                while PortB.1=1
+                wend 
+                hamle=hamle+1   
+                hserout[tahmin]
+                if gdeger==tahmin then 
+                    kontrol=1
+                    goto tebriket
+                endif 
+                if tahmin<gdeger then
+                    Lcdout $fe,1,"Tahmine Baslayabilirisin" 
+                    lcdout $fe,$C0,"Tahmin: ",#tahmin,0
+                else
+                    Lcdout $fe,1,"Tahmine Baslayabilirisin"
+                    lcdout $fe,$C0,"Tahmin: ",#tahmin,1 
+                endif
+                pause 200  
+            endif 
+        wend
+
+
+
+    wend
+
+goto tahminet
+
+
+arttir:
+    if PortB.0==1 then
+        while PortB.0==1
+        wend
+        sayi=sayi+1
+    endif
+return
+
+azalt:
+    if PortB.2==1 then
+        while PortB.2==1
+        wend
+        if sayi!=0 then sayi=sayi-1
+    endif
+return
+
+bekleme:
+   lcdout $fe,1,"1. Oyuncu Tahmini Belirleyecek" 
+   Pause 100
+goto tahminet
+
+tebriket:
+    
+    lcdout $fe,1,"Tebrikler kazandiniz"
+    lcdout $fe,$C0,"Toplam ",#hamle," adet hamle yaptiniz" 
+    pause 50
+    hserin[basadon]
+    if basadon==0 then goto tebriket
+    PortB.1=0
+    while PortB.1==1
+    wend    
+goto label
+
+son:
+    while PortB.1==0
+        lcdout $fe,1, "2. oyuncunun belirlediði sayi: ",#sayi
+        lcdout $fe,$C0,"Sayi bulundu , Toplam hamle:",#hamle
+        pause 50
+    wend
+    hserout[1]
+    while PortB.1==1
+    wend
+
+goto label
