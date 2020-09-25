@@ -1,0 +1,89 @@
+DEfine LCD_DREG PORTD            
+define LCD_DBIT 0
+define LCD_RSREG PORTB
+define LCD_RSBIT 0
+define LCD_EREG PORTB
+define LCD_EBIT 1
+define LCD_BITS 8
+TRISE=%000
+PAUSE 100
+
+define ADC_BITS 8
+define ADC_CLOCK 1
+define ADC_SAPMLEUS 50
+
+TrisA=%000001
+ADCON1=0
+i var byte
+j var word 
+k var byte
+m var  byte
+z var byte
+          
+
+lcdout $fe,$48,28,28,31,31,31,28,28    
+lcdout $fe,$50,28,4,7,1,7,4,28        
+lcdout $fe,$58,28,20,23,17,23,20,28    
+lcdout $fe,$60,31,28,28,28,28,28,31         
+lcdout $fe,$68,31,24,24,24,24,24,31
+lcdout $fe,$70,31,16,16,16,16,16,31
+lcdout $fe,$78,31,30,30,30,30,30,31
+
+label:
+    ADCIN 0,i
+    j=i
+    j=j*136
+    j=j/255
+    z=j dig 2
+    k=j dig 1
+    m=j dig 0
+
+    gosub goster
+   
+goto label
+
+goster: 
+    if j=>125 then 
+        select case j :
+        case 136
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,255,1,"  %100"
+            pause 250
+        case 134
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,255,3,"  %80"
+            pause 250
+        case 132
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,255,2,"  %60"
+            pause 250
+        case 130
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,7,2,"  %40"
+            pause 250
+        case 128
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,4,2,"  %20"
+            pause 250
+         case 126
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,5,2,"  %10"
+            pause  150
+            lcdout $fe,$C0,6,2,"  %10"
+            pause 250
+          case 125
+            lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+            lcdout $fe,$C0,5,2,"  %10"
+            pause  150
+            lcdout $fe,$C0,6,2,"  %10"
+            pause 250   
+        end select                          
+    else
+        lcdout $fe,1,"Aku:",#z,#k,",",#m,"Volt" 
+        lcdout $fe,$C0,6,2,"  %0"
+        lcdout $fe,$C0,"  "
+        pause  100
+        lcdout $fe,$C0,6,2,"  %0"
+        pause 250
+    endif
+return
