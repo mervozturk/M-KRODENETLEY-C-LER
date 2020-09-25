@@ -1,0 +1,64 @@
+
+define HSER_RCSTA 90H
+define HSER_TXSTA 24H
+define HSER_BAUD 9600
+define HSER_CLROERR 1
+
+
+TrisA=%011000
+TrisB=0
+i var byte
+j var byte
+i[0]=%00000001
+i[1]=%00000010
+i[2]=%00000100
+i[3]=%00001000
+
+label:
+    hserin[i]
+    hserout[i,13,10]
+    if i=="d" then gosub ileri
+    if i=="a" then gosub geri
+    if i=="w" then goto sureklileri
+    if i=="s" then goto surekligeri
+    
+goto label
+
+ileri:
+    if j<=3 then
+        PortB=i[j]
+        pause 100
+        j=j+1
+    else
+        j=0
+    endif
+return
+
+geri:
+    if j=>0 then 
+        PortB=i[j]
+        pause 100
+        j=j-1
+    else
+        j=3
+    endif
+return
+sureklileri :
+      if j<=3 then
+        PortB=i[j]
+        pause 500
+        j=j+1
+    else
+        j=0
+    endif
+goto sureklileri
+  
+surekligeri:
+    if j=>0 then 
+        PortB=i[j]
+        pause 100
+        j=j-1
+    else
+        j=3
+    endif
+goto surekligeri
